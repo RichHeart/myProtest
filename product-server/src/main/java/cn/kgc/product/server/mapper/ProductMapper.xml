@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.kgc.product.server.mapper.ProductMapper">
+    <resultMap id="productMap" type="Product">
+        <id column="id" property="id"/>
+        <association property="category" column="category_id"
+                     select="cn.kgc.product.server.mapper.CategoryMapper.selectCategoryById"/>
+    </resultMap>
+
+    <select id="selectAllProducts" resultMap="productMap">
+        select * from product
+
+        <where>
+            <if test="categoryId != null and categoryId != 0">
+                category_id = #{categoryId}
+            </if>
+            <if test="productName != null and productName != ''">
+                and name like concat('%', #{productName}, '%')
+            </if>
+            <if test="priceMin != null">
+                and price &gt;= #{priceMin}
+            </if>
+            <if test="priceMax != null">
+                and price &lt;= #{priceMax}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectProductById" parameterType="Integer" resultType="Product">
+        select * from product where id = #{id}
+    </select>
+
+    <select id="selectProductsByList" parameterType="List" resultMap="productMap">
+        select * from product where id in
+
+        <foreach collection="list" open="(" close=")" separator="," item="i">
+            #{i}
+        </foreach>
+    </select>
+</mapper>
